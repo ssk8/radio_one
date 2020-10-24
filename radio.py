@@ -3,7 +3,7 @@ from mplayer import Player
 from time import sleep
 
 
-enc_pin_1, enc_pin_2 = 23, 24
+enc_pin_1, enc_pin_2 = 24, 23
 enc_button_pin, top_button_pin = 17, 27
 last_encoded, encoder_value, last_encoder_value = 0, 70, 0
 enc_button_press, top_button_press = False, False
@@ -50,9 +50,9 @@ def get_volume():
 
 def playing(player):
     global enc_button_press, top_button_press
-    #player.loadfile("test2.mp3")
-    
-    player.loadfile("https://radio.stereoscenic.com/asp-s")
+    #music = "test.mp3"
+    music = "https://radio.stereoscenic.com/asp-s"
+    player.loadfile(music)
     while not top_button_press:
         sleep(.5)
         if encoder_value != last_encoder_value:
@@ -60,9 +60,9 @@ def playing(player):
         if enc_button_press:
             player.pause()
             enc_button_press = False
-    top_button_press =  False
     player.stop()
     sleep(1)
+    top_button_press =  False
 
 
 def main():
@@ -72,8 +72,10 @@ def main():
     while True:
         sleep(.5)
         if top_button_press:
+            sleep(.5)
             top_button_press, enc_button_press =  False, False
             playing(player)
+            sleep(.5)
 
 
 if __name__ == "__main__":
