@@ -15,18 +15,18 @@ def update_encoder(channel=0):
     MSB = GPIO.input(enc_pin_1) == GPIO.LOW
     LSB = GPIO.input(enc_pin_2) == GPIO.LOW
     encoded = (MSB << 1) | LSB
-    summed  = (last_encoded << 2) | encoded
-    if summed in (13, 4, 2, 11): encoder_value +=1
-    if summed in (14, 7, 1, 8): encoder_value -=1
+    summed = (last_encoded << 2) | encoded
+    if summed in (13, 4, 2, 11): encoder_value += 1
+    if summed in (14, 7, 1, 8): encoder_value -= 1
     last_encoded = encoded
 
 
-def enc_button_press_event(channel=0):
+def enc_button_event(channel=0):
     global enc_button_press
     enc_button_press = True
 
 
-def top_button_press_event(channel=0):
+def top_button_event(channel=0):
     global top_button_press
     top_button_press = True
 
@@ -36,33 +36,35 @@ for pin in (enc_pin_1, enc_pin_2, enc_button_pin, top_button_pin):
     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 for pin in (enc_pin_1, enc_pin_2):
     GPIO.add_event_detect(pin, GPIO.FALLING, callback=update_encoder)
-GPIO.add_event_detect(enc_button_pin, GPIO.FALLING, callback=enc_button_press_event)
-GPIO.add_event_detect(top_button_pin, GPIO.FALLING, callback=top_button_press_event)
+GPIO.add_event_detect(enc_button_pin, GPIO.FALLING, callback=enc_button_event)
+GPIO.add_event_detect(top_button_pin, GPIO.FALLING, callback=top_button_event)
 
 
 def get_volume():
-    if encoder_value>100:
-         return 100
-    elif encoder_value<0:
+    if encoder_value > 100:
+        return 100
+    elif encoder_value < 0:
         return 0
     else:
         return encoder_value
 
+
 def playing(player):
-    global enc_button_press, top_button_press
-    #music = "test.mp3"
+    global enc_button_press, top_button_press, last_encoder_value
+#    music = "test.mp3"
     music = "https://radio.stereoscenic.com/asp-s"
     player.loadfile(music)
     while not top_button_press:
         sleep(.5)
         if encoder_value != last_encoder_value:
+            last_encoder_value = encoder_value
             player.volume = get_volume()
         if enc_button_press:
             player.pause()
             enc_button_press = False
     player.stop()
     sleep(1)
-    top_button_press =  False
+    top_button_press = False
 
 
 def main():
@@ -73,7 +75,7 @@ def main():
         sleep(.5)
         if top_button_press:
             sleep(.5)
-            top_button_press, enc_button_press =  False, False
+            top_button_press, enc_button_press = False, False
             playing(player)
             sleep(.5)
 
