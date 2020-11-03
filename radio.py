@@ -1,31 +1,16 @@
 import RPi.GPIO as GPIO
 from mplayer import Player
-from time import sleep
+from time import sleep, time
 from os import system
+from encoder import Encoder
 
-music = "/home/pi/media/test2.mp3"
-#music = "https://radio.stereoscenic.com/asp-s"
+#music = "/home/pi/media/test2.mp3"
+#music = "https://5d497a7ce1964.streamlock.net/RK/HD1.stream/playlist.m3u8"
+music = "https://radio.stereoscenic.com/asp-s"
 
 enc_pin_1, enc_pin_2 = 24, 23
 enc_button_pin, top_button_pin = 17, 27
-last_encoded, encoder_value, last_encoder_value = 0, 70, 0
-enc_button_press, top_button_press = False, False
-
-
-def update_encoder(channel):
-    global encoder_value, last_encoded
-    encoded = ((GPIO.input(enc_pin_1) == GPIO.LOW) << 1) | (GPIO.input(enc_pin_2) == GPIO.LOW)
-    s = (last_encoded << 2) | encoded
-    encoder_value += (s in (13, 4, 2, 11)) - (s in (14, 7, 1, 8))
-    last_encoded = encoded
-
-
-def enc_button_event(channel):
-    global enc_button_press
-    if GPIO.input(top_button_pin) == GPIO.LOW:
-        print("\nshutdown")
-        system('sudo shutdown now -h')
-    enc_button_press = True
+top_button_press = False
 
 
 def top_button_event(channel):
@@ -34,49 +19,52 @@ def top_button_event(channel):
 
 
 GPIO.setmode(GPIO.BCM)
-for pin in (enc_pin_1, enc_pin_2, enc_button_pin, top_button_pin):
-    GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-for pin in (enc_pin_1, enc_pin_2):
-    GPIO.add_event_detect(pin, GPIO.FALLING, callback=update_encoder, bouncetime=5)
-GPIO.add_event_detect(enc_button_pin, GPIO.FALLING, callback=enc_button_event, bouncetime=500)
+GPIO.setup(top_button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.add_event_detect(top_button_pin, GPIO.FALLING, callback=top_button_event, bouncetime=500)
 
 
-def get_volume():
-    if encoder_value > 100:
+def get_volume(encoder):
+    if encoder.value > 100:
+        encoder.value = 100
         return 100
-    elif encoder_value < 0:
+    elif encoder.value < 0:
+        encoder.value = 0
         return 0
     else:
-        return encoder_value
+        return encoder.value
 
 
-def playing(player):
-    global enc_button_press, top_button_press, last_encoder_value
+def playing(player, encoder):
+    global top_button_press
     player.loadfile(music)
-    while not top_button_press:
-        sleep(.5)
-        if encoder_value != last_encoder_value:
-            last_encoder_value = encoder_value
-            player.volume = get_volume()
-        if enc_button_press:
+    player.volume = get_volume(encoder)
+    last_encoder_value = encoder.value
+    start_time = time()
+    while (not top_button_press) and ((time()-start_time)<60*120):
+        sleep(.1)
+        if encoder.value != last_encoder_value:
+            last_encoder_value = encoder.value
+            player.volume = get_volume(encoder)
+        if encoder.enc_button_press:
             player.pause()
-            enc_button_press = False
+            encoder.enc_button_press = False
     player.stop()
     sleep(1)
     top_button_press = False
 
 
 def main():
-    global enc_button_press, top_button_press
+    global top_button_press
+    encoder = Encoder(enc_pin_1, enc_pin_2, enc_button_pin)
+    encoder.value = 70
     Player.path = "/usr/bin/mplayer"
     player = Player()
     while True:
         sleep(.5)
-        if top_button_press:
+        if top_button_press: 
             sleep(.5)
-            top_button_press, enc_button_press = False, False
-            playing(player)
+            top_button_press, encoder.enc_button_press = False, False
+            playing(player, encoder)
             sleep(.5)
 
 
