@@ -66,8 +66,13 @@ def main():
             top_button_press, encoder.enc_button_press = False, False
             playing(player, encoder)
             sleep(.5)
+        if encoder.enc_button_press:
+            sleep(4)
+            if top_button_press:
+                system('sudo shutdown now -h')
+            encoder.enc_button_press = False
 
-
+            
 if __name__ == "__main__":
     try:
         main()
