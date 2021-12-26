@@ -10,3 +10,9 @@ raspberry pi based "single button" radio (I guess there are technically 2 button
 ![](https://raw.githubusercontent.com/ssk8/radio_one/master/radio_out.jpg)
 
 ![](https://raw.githubusercontent.com/ssk8/radio_one/master/radio_guts.jpg)
+
+
+for setup:
+wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/i2samp.sh
+apt install python3-pip git vim mplayer
+python3 -m pip install mplayer.py

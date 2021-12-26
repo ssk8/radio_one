@@ -4,9 +4,7 @@ from time import sleep, time
 from os import system
 from encoder import Encoder
 
-#music = "/home/pi/media/test2.mp3"
-#music = "https://5d497a7ce1964.streamlock.net/RK/HD1.stream/playlist.m3u8"
-music = "https://radio.stereoscenic.com/asp-s"
+music = "/home/pi/media/test2.mp3"
 
 enc_pin_1, enc_pin_2 = 24, 23
 enc_button_pin, top_button_pin = 17, 27
