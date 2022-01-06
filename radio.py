@@ -1,10 +1,11 @@
 import RPi.GPIO as GPIO
-from mplayer import Player
+import mpv, alsaaudio
 from time import sleep, time
 from os import system
 from encoder import Encoder
 
-music = "/home/pi/media/test2.mp3"
+#music = "/home/pi/media/test2.mp3"
+music = "https://radio.stereoscenic.com/asp-s"
 
 enc_pin_1, enc_pin_2 = 24, 23
 enc_button_pin, top_button_pin = 17, 27
@@ -32,19 +33,18 @@ def get_volume(encoder):
         return encoder.value
 
 
-def playing(player, encoder):
+def playing(player, mixer, encoder):
     global top_button_press
-    player.loadfile(music)
-    player.volume = get_volume(encoder)
+    player.play(music)
+    mixer.setvolume(get_volume(encoder))
     last_encoder_value = encoder.value
     start_time = time()
     while (not top_button_press) and ((time()-start_time)<60*120):
         sleep(.1)
         if encoder.value != last_encoder_value:
             last_encoder_value = encoder.value
-            player.volume = get_volume(encoder)
+            mixer.setvolume(get_volume(encoder))
         if encoder.enc_button_press:
-            player.pause()
             encoder.enc_button_press = False
     player.stop()
     sleep(1)
@@ -55,14 +55,14 @@ def main():
     global top_button_press
     encoder = Encoder(enc_pin_1, enc_pin_2, enc_button_pin)
     encoder.value = 70
-    Player.path = "/usr/bin/mplayer"
-    player = Player()
+    player = mpv.MPV()
+    am = alsaaudio.Mixer('PCM')
     while True:
         sleep(.5)
         if top_button_press: 
             sleep(.5)
             top_button_press, encoder.enc_button_press = False, False
-            playing(player, encoder)
+            playing(player, am, encoder)
             sleep(.5)
         if encoder.enc_button_press:
             sleep(4)

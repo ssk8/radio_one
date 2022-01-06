@@ -14,5 +14,11 @@ raspberry pi based "single button" radio (I guess there are technically 2 button
 
 for setup:
 wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/i2samp.sh
-apt install python3-pip git vim mplayer
-python3 -m pip install mplayer.py
+
+follow: https://learn.adafruit.com/adafruit-max98357-i2s-class-d-mono-amp/pi-i2s-tweaks
+
+apt install python3-pip git vim mpv
+
+python3 -m pip install pyalsaaudio python-mpv
+
+crontab -e >> @reboot sleep 20 && python3 /home/pi/radio_one/radio.py
