@@ -11,9 +11,9 @@ raspberry pi based "single button" radio (I guess there are technically 2 button
 - I2S DAC/amp 
 - rotary encoder for volume. encoder button pauses and shuts down if top button is held
 
-<img src=https://github.com/ssk8/project_pics/blob/main/radio_out.jpg width="300"/>
+<img src=https://raw.githubusercontent.com/ssk8/project_pics/main/radio_out.jpg width="300"/>
 
-<img src=https://github.com/ssk8/project_pics/blob/main/radio_guts.jpg width="300"/>
+<img src=https://raw.githubusercontent.com/ssk8/project_pics/main/radio_guts.jpg width="300"/>
 
 
 for setup:
